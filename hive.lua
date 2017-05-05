@@ -17,7 +17,7 @@ local Hivefile_KEY_VALUE = "value"
 
 local HiveDir = "Hive"
 local HiveCache = HiveDir .. "/Cache"
-local HiveCheckouts = HiveDir .. "/" .. "Checkouts"
+local HiveCheckouts = HiveDir .. "/Checkouts"
 local HiveUpdate = false
 
 function fileExists(path)
@@ -93,10 +93,10 @@ Available commands:
 
 Hivefile Example
 
-    Github "zruibin/RBMenu" 
-    #Github "zruibin/RBMenu" master
-    #Github "zruibin/RBMenu" tag=>"xx.xx"
-    #Github "zruibin/RBMenu" commit=>"..."
+    github "zruibin/RBMenu" 
+    #github "zruibin/RBMenu" master
+    #github "zruibin/RBMenu" tag=>"xx.xx"
+    #github "zruibin/RBMenu" commit=>"..."
 
     #coding
     git "https://coding.net/zruibin/h5.git" 
@@ -105,7 +105,7 @@ Hivefile Example
     #git "https://coding.net/zruibin/h5.git" commit=>".."
 
     #location
-    git "zruibin/axle" path=>"../Project/axle"
+    local "zruibin/axle" path=>"../Project/axle"
     ]]
     print(str)
 end
@@ -135,17 +135,18 @@ function cacheRepo(value)
     local url = value[Hivefile_KEY_NAME]
     
     local package = nil
-    if action ~= git then
+    if action == "github" then
         package = splitStringByChar(value[Hivefile_KEY_NAME], "/")  -- Github
         url = "https://github.com/" .. value[Hivefile_KEY_NAME] .. ".git"
     else
-        if type ~= "path" then
+        if action == "local" then
+            package = splitStringByChar(url, "/")
+            if #package == 1 then package = {"1", value[Hivefile_KEY_NAME]} end
+            url = value[Hivefile_KEY_VALUE]
+        else
             local tempPackage = splitStringByChar(url, "/")
             tempName = tempPackage[#tempPackage-1] .. "/" .. string.sub(tempPackage[#tempPackage],1, -5)
             package = splitStringByChar(tempName, "/")
-        else
-            package = splitStringByChar(url, "/")
-            url = value[Hivefile_KEY_VALUE]
         end
     end
 
@@ -154,7 +155,7 @@ function cacheRepo(value)
     local version = ""
     if value[Hivefile_KEY_VALUE] ~= nil then version = value[Hivefile_KEY_VALUE] end
 
-    -- if true then return end
+    -- do return end
 
     local cacheDir = HiveCache .. "/" .. name
     print(cacheDir)
